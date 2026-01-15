@@ -510,16 +510,27 @@ function BioBibBuilder() {
   const exportDOCX = async () => {
     setMessage({ type: 'success', text: 'Generating DOCX...' });
     try {
+      // Load docx library from unpkg (exposes as window.docx)
       if (!window.docx) {
         await new Promise((resolve, reject) => {
           const script = document.createElement('script');
-          script.src = 'https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/docx.min.js';
-          script.onload = resolve;
-          script.onerror = reject;
+          script.src = 'https://unpkg.com/docx@8.5.0/build/index.umd.js';
+          script.onload = () => {
+            // Give it a moment to initialize
+            setTimeout(resolve, 100);
+          };
+          script.onerror = () => reject(new Error('Failed to load docx library'));
           document.head.appendChild(script);
         });
       }
-      const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, AlignmentType, HeadingLevel, BorderStyle, WidthType, ShadingType, PageBreak } = window.docx;
+      
+      // Access the library
+      const docxLib = window.docx;
+      if (!docxLib) {
+        throw new Error('docx library not available');
+      }
+      
+      const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, AlignmentType, HeadingLevel, BorderStyle, WidthType, ShadingType, PageBreak } = docxLib;
 
       const border = { style: BorderStyle.SINGLE, size: 1, color: "999999" };
       const borders = { top: border, bottom: border, left: border, right: border };
@@ -607,8 +618,11 @@ function BioBibBuilder() {
       a.download = `biobib_${cv.personalInfo.lastName || 'cv'}_${new Date().toISOString().split('T')[0]}.docx`;
       a.click();
       setMessage({ type: 'success', text: 'DOCX exported!' });
-    } catch (err) { console.error(err); setMessage({ type: 'error', text: 'Export failed.' }); }
-    setTimeout(() => setMessage(null), 4000);
+    } catch (err) { 
+      console.error('DOCX Export Error:', err); 
+      setMessage({ type: 'error', text: `Export failed: ${err.message || 'Unknown error'}` }); 
+    }
+    setTimeout(() => setMessage(null), 5000);
   };
 
   const pubCount = (arr) => arr?.length || 0;
