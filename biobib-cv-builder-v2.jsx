@@ -479,7 +479,7 @@ const ListItemEditor = ({ items, setItems, fields, itemName }) => {
             />
           ))}
         </div>
-        <Button onClick={addItem} size="sm"><Icons.Plus /> Add</Button>
+        <Button onClick={addItem} size="sm"><Icons.Plus /> save/add</Button>
       </div>
     </div>
   );

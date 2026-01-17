@@ -348,7 +348,7 @@ const ListItemEditor = ({ items, setItems, fields, itemName }) => {
             <Input key={field.id} label={field.label} value={newItem[field.id] || ''} onChange={(value) => setNewItem({ ...newItem, [field.id]: value })} placeholder={field.placeholder} className={field.fullWidth ? 'col-span-2' : ''} />
           ))}
         </div>
-        <Button onClick={addItem} size="sm"><Icons.Plus /> Add</Button>
+        <Button onClick={addItem} size="sm"><Icons.Plus /> save/add</Button>
       </div>
     </div>
   );
