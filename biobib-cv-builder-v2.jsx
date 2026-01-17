@@ -165,8 +165,8 @@ function parseMedline(text) {
     }
   }
   
-  // Sort by year descending
-  publications.sort((a, b) => b.year - a.year);
+  // Sort by year ascending (newest last)
+  publications.sort((a, b) => a.year - b.year);
   
   return publications;
 }
@@ -733,30 +733,93 @@ export default function BioBibBuilder() {
     });
   }, []);
 
+  // Helper function to check if a publication already exists
+  const isDuplicate = (newPub, existingPubs) => {
+    for (const existing of existingPubs) {
+      // Get PMID from both new and existing publication
+      const newPmid = newPub.pmid;
+      const existingPmid = typeof existing === 'object' ? existing.pmid : null;
+
+      // If both have PMID and they match, it's a duplicate
+      if (newPmid && existingPmid && newPmid === existingPmid) {
+        return true;
+      }
+
+      // Fall back to text comparison if no PMID match
+      const newText = newPub.text || newPub;
+      const existingText = typeof existing === 'object' ? (existing.text || existing) : existing;
+
+      // Check if texts are identical (case-insensitive, trimmed)
+      if (typeof newText === 'string' && typeof existingText === 'string') {
+        if (newText.trim().toLowerCase() === existingText.trim().toLowerCase()) {
+          return true;
+        }
+      }
+    }
+    return false;
+  };
+
   const handleImport = ({ type, data }) => {
     if (type === 'cv') {
       setCV(prev => ({ ...prev, ...data, lastUpdated: new Date().toISOString() }));
       setMessage({ type: 'success', text: 'CV data imported! Please review and complete.' });
     } else if (type === 'publications') {
+      let importedCount = 0;
+      let skippedCount = 0;
+
       setCV(prev => {
         const newCV = JSON.parse(JSON.stringify(prev));
+
+        // Filter out duplicates from original peer-reviewed
+        const newOriginal = data.original.filter(pub => {
+          const exists = isDuplicate(pub, newCV.bibliography.primaryWork.originalPeerReviewed);
+          if (exists) skippedCount++;
+          else importedCount++;
+          return !exists;
+        });
+
+        // Filter out duplicates from reviews
+        const newReviews = data.reviews.filter(pub => {
+          const exists = isDuplicate(pub, newCV.bibliography.primaryWork.reviewInvited);
+          if (exists) skippedCount++;
+          else importedCount++;
+          return !exists;
+        });
+
+        // Filter out duplicates from books/chapters
+        const newBooks = data.books.filter(pub => {
+          const exists = isDuplicate(pub, newCV.bibliography.primaryWork.booksChapters);
+          if (exists) skippedCount++;
+          else importedCount++;
+          return !exists;
+        });
+
         newCV.bibliography.primaryWork.originalPeerReviewed = [
           ...newCV.bibliography.primaryWork.originalPeerReviewed,
-          ...data.original
+          ...newOriginal
         ];
         newCV.bibliography.primaryWork.reviewInvited = [
           ...newCV.bibliography.primaryWork.reviewInvited,
-          ...data.reviews
+          ...newReviews
         ];
         newCV.bibliography.primaryWork.booksChapters = [
           ...newCV.bibliography.primaryWork.booksChapters,
-          ...data.books
+          ...newBooks
         ];
         newCV.lastUpdated = new Date().toISOString();
         return newCV;
       });
-      const total = data.original.length + data.reviews.length + data.books.length;
-      setMessage({ type: 'success', text: `Imported ${total} publications!` });
+
+      let message = '';
+      if (importedCount > 0 && skippedCount > 0) {
+        message = `Imported ${importedCount} publication${importedCount !== 1 ? 's' : ''}, skipped ${skippedCount} duplicate${skippedCount !== 1 ? 's' : ''}`;
+      } else if (importedCount > 0) {
+        message = `Imported ${importedCount} publication${importedCount !== 1 ? 's' : ''}!`;
+      } else {
+        message = `All ${skippedCount} publication${skippedCount !== 1 ? 's were' : ' was'} already present`;
+      }
+
+      setMessage({ type: 'success', text: message });
       setActiveSection('bibliography');
     }
     setTimeout(() => setMessage(null), 4000);

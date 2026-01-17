@@ -174,7 +174,7 @@ function parseMedline(text) {
     }
   }
   
-  publications.sort((a, b) => b.year - a.year);
+  publications.sort((a, b) => a.year - b.year);
   return publications;
 }
 
@@ -468,17 +468,56 @@ function BioBibBuilder() {
     });
   }, []);
 
+  const isDuplicate = (newPub, existingPubs) => {
+    for (const existing of existingPubs) {
+      const newPmid = newPub.pmid;
+      const existingPmid = typeof existing === 'object' ? existing.pmid : null;
+      if (newPmid && existingPmid && newPmid === existingPmid) return true;
+      const newText = newPub.text || newPub;
+      const existingText = typeof existing === 'object' ? (existing.text || existing) : existing;
+      if (typeof newText === 'string' && typeof existingText === 'string') {
+        if (newText.trim().toLowerCase() === existingText.trim().toLowerCase()) return true;
+      }
+    }
+    return false;
+  };
+
   const handleImport = ({ type, data }) => {
     if (type === 'publications') {
+      let importedCount = 0;
+      let skippedCount = 0;
       setCV(prev => {
         const newCV = JSON.parse(JSON.stringify(prev));
-        newCV.bibliography.primaryWork.originalPeerReviewed = [...newCV.bibliography.primaryWork.originalPeerReviewed, ...data.original];
-        newCV.bibliography.primaryWork.reviewInvited = [...newCV.bibliography.primaryWork.reviewInvited, ...data.reviews];
-        newCV.bibliography.primaryWork.booksChapters = [...newCV.bibliography.primaryWork.booksChapters, ...data.books];
+        const newOriginal = data.original.filter(pub => {
+          const exists = isDuplicate(pub, newCV.bibliography.primaryWork.originalPeerReviewed);
+          if (exists) skippedCount++; else importedCount++;
+          return !exists;
+        });
+        const newReviews = data.reviews.filter(pub => {
+          const exists = isDuplicate(pub, newCV.bibliography.primaryWork.reviewInvited);
+          if (exists) skippedCount++; else importedCount++;
+          return !exists;
+        });
+        const newBooks = data.books.filter(pub => {
+          const exists = isDuplicate(pub, newCV.bibliography.primaryWork.booksChapters);
+          if (exists) skippedCount++; else importedCount++;
+          return !exists;
+        });
+        newCV.bibliography.primaryWork.originalPeerReviewed = [...newCV.bibliography.primaryWork.originalPeerReviewed, ...newOriginal];
+        newCV.bibliography.primaryWork.reviewInvited = [...newCV.bibliography.primaryWork.reviewInvited, ...newReviews];
+        newCV.bibliography.primaryWork.booksChapters = [...newCV.bibliography.primaryWork.booksChapters, ...newBooks];
         newCV.lastUpdated = new Date().toISOString();
         return newCV;
       });
-      setMessage({ type: 'success', text: `Imported ${data.original.length + data.reviews.length + data.books.length} publications!` });
+      let message = '';
+      if (importedCount > 0 && skippedCount > 0) {
+        message = `Imported ${importedCount} publication${importedCount !== 1 ? 's' : ''}, skipped ${skippedCount} duplicate${skippedCount !== 1 ? 's' : ''}`;
+      } else if (importedCount > 0) {
+        message = `Imported ${importedCount} publication${importedCount !== 1 ? 's' : ''}!`;
+      } else {
+        message = `All ${skippedCount} publication${skippedCount !== 1 ? 's were' : ' was'} already present`;
+      }
+      setMessage({ type: 'success', text: message });
       setActiveSection('bibliography');
     }
     setTimeout(() => setMessage(null), 4000);
