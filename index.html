@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Academic CV Builder - UCSD Bio-Bib Format</title>
+  <title>Academic CV Builder</title>
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -348,7 +348,7 @@ const ListItemEditor = ({ items, setItems, fields, itemName }) => {
             <Input key={field.id} label={field.label} value={newItem[field.id] || ''} onChange={(value) => setNewItem({ ...newItem, [field.id]: value })} placeholder={field.placeholder} className={field.fullWidth ? 'col-span-2' : ''} />
           ))}
         </div>
-        <Button onClick={addItem} size="sm"><Icons.Plus /> save/add</Button>
+        <Button onClick={addItem} size="sm"><Icons.Plus /> Save/Add</Button>
       </div>
     </div>
   );
@@ -788,7 +788,7 @@ function BioBibBuilder() {
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-teal-600 flex items-center justify-center text-white"><Icons.FileText /></div>
-            <div><h1 className="font-bold text-slate-800">Academic CV Builder</h1><p className="text-xs text-slate-500">UCSD Bio-Bib Format</p></div>
+            <div><h1 className="font-bold text-slate-800">Academic CV Builder</h1><p className="text-xs text-slate-500">Follows UCSD Bio-Bib Format</p></div>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
             <input ref={fileInputRef} type="file" accept=".json" onChange={handleFileUpload} className="hidden" />
