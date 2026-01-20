@@ -79,6 +79,7 @@ const Icons = {
   Database: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" /></svg>,
   File: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>,
   AlertCircle: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>,
+  QuestionCircle: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>,
 };
 
 // ==================== MEDLINE PARSER ====================
@@ -712,12 +713,120 @@ const ImportModal = ({ isOpen, onClose, onImport }) => {
   );
 };
 
+// README Modal Component
+const ReadmeModal = ({ isOpen, onClose }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+        <div className="px-5 py-4 border-b flex items-center justify-between bg-gradient-to-r from-teal-600 to-blue-600">
+          <h2 className="font-bold text-white text-lg">Help & Documentation</h2>
+          <button onClick={onClose} className="p-1.5 text-white/80 hover:text-white rounded-lg">
+            <Icons.X />
+          </button>
+        </div>
+
+        <div className="p-6 overflow-y-auto flex-1">
+          <div className="prose prose-sm max-w-none">
+            <h1 className="text-2xl font-bold text-slate-800 mb-4">Academic CV Builder</h1>
+            <p className="text-slate-600 mb-4">A web-based tool for creating academic CVs and bio-bibliographies in UCSD Bio-Bib format.</p>
+
+            <h2 className="text-xl font-bold text-slate-800 mt-6 mb-3">Features</h2>
+
+            <h3 className="text-lg font-semibold text-slate-700 mt-4 mb-2">Personal Information</h3>
+            <ul className="list-disc list-inside text-slate-600 space-y-1 mb-4">
+              <li>Enter your name, department, and professional titles</li>
+              <li>Store your basic biographical information</li>
+            </ul>
+
+            <h3 className="text-lg font-semibold text-slate-700 mt-4 mb-2">Employment & Education</h3>
+            <ul className="list-disc list-inside text-slate-600 space-y-1 mb-4">
+              <li>Track your employment history with positions, institutions, and dates</li>
+              <li>Document your educational background including degrees and institutions</li>
+            </ul>
+
+            <h3 className="text-lg font-semibold text-slate-700 mt-4 mb-2">Professional Data</h3>
+            <ul className="list-disc list-inside text-slate-600 space-y-1 mb-4">
+              <li><strong>University Service:</strong> Committee memberships and administrative roles</li>
+              <li><strong>Professional Memberships:</strong> Societies and organizations</li>
+              <li><strong>Honors & Awards:</strong> Recognition and achievements</li>
+              <li><strong>Grants:</strong> Current and previous funding (with agency, amount, role)</li>
+              <li><strong>External Professional Activities:</strong> National committee service, editorial boards, ad hoc reviews, presentations</li>
+              <li><strong>Diversity Contributions:</strong> DEI-related activities and initiatives</li>
+              <li><strong>Student Instructional Activities:</strong> Teaching, supervision, mentorship</li>
+            </ul>
+
+            <h3 className="text-lg font-semibold text-slate-700 mt-4 mb-2">Bibliography Management</h3>
+            <p className="text-slate-600 mb-2">Organize your scholarly work into categories:</p>
+            <ul className="list-disc list-inside text-slate-600 space-y-1 mb-4">
+              <li><strong>Primary Work:</strong> Original peer-reviewed publications, reviews, books & chapters, editorials, commentary, case reports</li>
+              <li><strong>Other Work:</strong> Abstracts, popular works, additional products</li>
+              <li><strong>Work in Progress:</strong> Track manuscripts under development</li>
+            </ul>
+
+            <h3 className="text-lg font-semibold text-slate-700 mt-4 mb-2">PubMed/MEDLINE Import</h3>
+            <p className="text-slate-600 mb-2">Import publications directly from PubMed:</p>
+            <ol className="list-decimal list-inside text-slate-600 space-y-1 mb-2">
+              <li>Click <strong>Import</strong> → <strong>PubMed Publications</strong></li>
+              <li>Upload a .txt file exported from PubMed (MEDLINE format) or paste the text directly</li>
+              <li>Click <strong>Parse Publications</strong> to extract citations</li>
+              <li>Select which publications to import</li>
+              <li>Click <strong>Import X Publications</strong></li>
+            </ol>
+            <p className="text-slate-600 font-semibold mb-1">Features:</p>
+            <ul className="list-disc list-inside text-slate-600 space-y-1 mb-4">
+              <li>Automatic duplicate detection (by PMID or text matching)</li>
+              <li>Automatic categorization (peer-reviewed, reviews, books/chapters)</li>
+              <li>Publications sorted by year (oldest to newest)</li>
+              <li>Smart feedback showing imported vs. skipped duplicates</li>
+            </ul>
+
+            <h3 className="text-lg font-semibold text-slate-700 mt-4 mb-2">Export Options</h3>
+            <ul className="list-disc list-inside text-slate-600 space-y-1 mb-4">
+              <li><strong>Export DOCX:</strong> Generate a formatted Microsoft Word document</li>
+              <li><strong>Export JSON:</strong> Save your CV data for backup or sharing</li>
+              <li><strong>Load JSON:</strong> Restore a previously saved CV</li>
+            </ul>
+
+            <h3 className="text-lg font-semibold text-slate-700 mt-4 mb-2">Preview</h3>
+            <p className="text-slate-600 mb-4">Click the <strong>Preview</strong> button to see a formatted preview of your CV before exporting.</p>
+
+            <h2 className="text-xl font-bold text-slate-800 mt-6 mb-3">Tips</h2>
+            <ul className="list-disc list-inside text-slate-600 space-y-1 mb-4">
+              <li>Save your work regularly using <strong>Export JSON</strong></li>
+              <li>Use the MEDLINE import feature to quickly add publications from PubMed</li>
+              <li>The duplicate detection will prevent re-importing the same publications</li>
+              <li>Publications are automatically sorted with oldest first, newest last</li>
+              <li>All form fields auto-save as you type</li>
+            </ul>
+
+            <h2 className="text-xl font-bold text-slate-800 mt-6 mb-3">Exporting from PubMed</h2>
+            <ol className="list-decimal list-inside text-slate-600 space-y-1 mb-4">
+              <li>Select your publications on PubMed</li>
+              <li>Choose "Send to" → "File"</li>
+              <li>Format: "MEDLINE"</li>
+              <li>Create file</li>
+              <li>Upload the .txt file to this tool using <strong>Import</strong> → <strong>PubMed Publications</strong></li>
+            </ol>
+          </div>
+        </div>
+
+        <div className="px-5 py-3 border-t bg-slate-50 flex justify-end">
+          <Button onClick={onClose} size="sm">Close</Button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Main Application
 export default function BioBibBuilder() {
   const [cv, setCV] = useState(emptyCV);
   const [activeSection, setActiveSection] = useState('personal');
   const [showPreview, setShowPreview] = useState(false);
   const [showImport, setShowImport] = useState(false);
+  const [showReadme, setShowReadme] = useState(false);
   const [message, setMessage] = useState(null);
   const fileInputRef = useRef(null);
 
@@ -1661,6 +1770,9 @@ export default function BioBibBuilder() {
           
           <div className="flex items-center gap-2 flex-wrap">
             <input ref={fileInputRef} type="file" accept=".json" onChange={handleFileUpload} className="hidden" />
+            <Button variant="secondary" size="sm" onClick={() => setShowReadme(true)}>
+              <Icons.QuestionCircle /> Help
+            </Button>
             <Button variant="secondary" size="sm" onClick={() => setShowImport(true)}>
               <Icons.Upload /> Import
             </Button>
@@ -1775,6 +1887,7 @@ export default function BioBibBuilder() {
 
       {showPreview && <PreviewModal />}
       <ImportModal isOpen={showImport} onClose={() => setShowImport(false)} onImport={handleImport} />
+      <ReadmeModal isOpen={showReadme} onClose={() => setShowReadme(false)} />
     </div>
   );
 }
